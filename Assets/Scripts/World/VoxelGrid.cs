@@ -29,14 +29,30 @@ public class VoxelGrid : MonoBehaviour
 	}
 
 	public static Vector3[] cubeVertices = {
-		new Vector3 (0.0f, 0.0f, 0.0f),
+		new Vector3 (0.0f, 0.0f, 0.0f), //face front  0-3
 		new Vector3 (1.0f, 0.0f, 0.0f),
 		new Vector3 (1.0f, 1.0f, 0.0f),
 		new Vector3 (0.0f, 1.0f, 0.0f),
-		new Vector3 (0.0f, 1.0f, 1.0f),
+		new Vector3 (0.0f, 1.0f, 1.0f), //face back 4-7
 		new Vector3 (1.0f, 1.0f, 1.0f),
 		new Vector3 (1.0f, 0.0f, 1.0f),
 		new Vector3 (0.0f, 0.0f, 1.0f),
+		new Vector3 (0.0f, 1.0f, 0.0f), //face top 8-11
+		new Vector3 (0.0f, 1.0f, 1.0f),
+		new Vector3 (1.0f, 1.0f, 1.0f),
+		new Vector3 (1.0f, 1.0f, 0.0f),
+		new Vector3 (0.0f, 0.0f, 0.0f), //face bottom - 12-15
+		new Vector3 (0.0f, 0.0f, 1.0f),
+		new Vector3 (1.0f, 0.0f, 1.0f),
+		new Vector3 (1.0f, 0.0f, 0.0f),
+		new Vector3 (0.0f, 0.0f, 1.0f), //face left 16-19
+		new Vector3 (0.0f, 1.0f, 1.0f),
+		new Vector3 (0.0f, 1.0f, 0.0f),
+		new Vector3 (0.0f, 0.0f, 0.0f),
+		new Vector3 (1.0f, 0.0f, 0.0f), //face right 20-23
+		new Vector3 (1.0f, 1.0f, 0.0f),
+		new Vector3 (1.0f, 1.0f, 1.0f),
+		new Vector3 (1.0f, 0.0f, 1.0f)
     };
 
  //    public static int[] cubeTriangles = {
@@ -60,18 +76,18 @@ public class VoxelGrid : MonoBehaviour
 	};
 
 	public static int[] topFace = {
-		2, 3, 4, //face top
-		2, 4, 5
+		8, 9, 11, //face top
+		10, 11, 9
 	};
 
 	public static int[] rightFace = {
-		1, 2, 5, //face right
-		1, 5, 6
+		20, 21, 23, //face right
+		22, 23, 21
 	};
 
 	public static int[] leftFace = {
-		0, 7, 4, //face left
-		0, 4, 3
+		16, 17, 19, //face left
+		18, 19, 17
 	};
 
 	public static int[] backFace = {
@@ -80,8 +96,8 @@ public class VoxelGrid : MonoBehaviour
 	};
 
 	public static int[] bottomFace = {
-		0, 6, 7, //face bottom
-		0, 1, 6
+		12, 15, 13, //face bottom
+		14, 13, 15
 	};
 
 	void Awake(){
@@ -101,6 +117,12 @@ public class VoxelGrid : MonoBehaviour
 
 	void MakeCube(){
 
+	}
+
+	void BlockUpdate(){
+		GenerateGridData();
+		GenerateMesh();
+		UpdateMeshRenderer();
 	}
 
 	void GenerateMesh(){
@@ -182,7 +204,7 @@ public class VoxelGrid : MonoBehaviour
 
         int activeVoxelCount = gridSurface.Count;
 
-        vertices = new Vector3[activeVoxelCount*8];
+        vertices = new Vector3[activeVoxelCount*24];
     	triangles = new int[nFaces*6];
 
         for(int g=0;g<gridSurface.Count;g++){
@@ -190,13 +212,11 @@ public class VoxelGrid : MonoBehaviour
         	float gi = gP[0];
         	float gj = gP[1];
         	float gk = gP[2];
-        	var faces = (FaceFlags) gridFaces[g];
 			Vector3 pos = new Vector3(scale*((float)gi),scale*((float)gj),scale*((float)gk));
-			for(int lv=0; lv < 8; lv++){
+			for(int lv=0; lv < 24; lv++){
 				vertices[lv+v] =  pos + scale*cubeVertices[lv];
 			}
-			int nDrawn = 0;
-			
+			var faces = (FaceFlags) gridFaces[g];
 			if((faces & FaceFlags.xBack) != 0){
 				for(int lt=0; lt < 6; lt++){
 					triangles[lt+t] = leftFace[lt]+v;
@@ -235,7 +255,7 @@ public class VoxelGrid : MonoBehaviour
 			}
 				
 				
-			v+=8;
+			v+=24;
 			// t+=nDrawn*6;
         }
         				
@@ -252,11 +272,12 @@ public class VoxelGrid : MonoBehaviour
     void Start()
     {
     	voxelCount = xSize*ySize*zSize;
-    	
-
+    
         GenerateGridData();
         GenerateMesh();
         UpdateMeshRenderer();
+
+        // InvokeRepeating("BlockUpdate", 0, 1.0f);
         
 		
     }
@@ -264,6 +285,6 @@ public class VoxelGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        mesh.RecalculateNormals();
+
     }
 }
