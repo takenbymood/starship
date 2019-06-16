@@ -6,12 +6,11 @@ using UnityEngine;
 
 
 
-public class VoxelGrid : MonoBehaviour
+public class VoxelChunk : MonoBehaviour
 {
 
 	public float scale; //the size of one voxel
 	public int xSize, ySize, zSize;
-	public int chunkSize; //the dimensions of one cubic chunk
 	private int[,,] grid; //the voxel grid
 	private Vector3[] vertices;
 	private int[] triangles;
@@ -104,8 +103,7 @@ public class VoxelGrid : MonoBehaviour
 		mesh = GetComponent<MeshFilter>().mesh;
 	}
 
-	void GenerateGridData(){
-		grid = new int[xSize,ySize,zSize];
+	public void GenerateGridData(){
         for(int i = 0; i < xSize; i++){
         	for(int j = 0; j < ySize; j++){
         		for(int k = 0; k < zSize; k++){
@@ -119,8 +117,21 @@ public class VoxelGrid : MonoBehaviour
 
 	}
 
-	void BlockUpdate(){
+	public void SetSize(int x,int y,int z){
+		xSize = x;
+		ySize = y;
+		zSize = z;
+	}
+
+	public void RegenerateMesh(){
+		grid = new int[xSize,ySize,zSize];
+    	voxelCount = xSize*ySize*zSize;
 		GenerateGridData();
+		BlockUpdate();
+		UpdateMeshRenderer();
+	}
+
+	void BlockUpdate(){
 		GenerateMesh();
 		UpdateMeshRenderer();
 	}
@@ -271,12 +282,7 @@ public class VoxelGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-    	voxelCount = xSize*ySize*zSize;
-    
-        GenerateGridData();
-        GenerateMesh();
-        UpdateMeshRenderer();
-
+        RegenerateMesh();
         // InvokeRepeating("BlockUpdate", 0, 1.0f);
         
 		
